@@ -1,4 +1,5 @@
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -189,6 +190,15 @@ public:
 // ======================================
 int main() {
 	try {
+		ofstream outputFile("output.txt");
+
+		if (!outputFile.is_open()) {
+			throw runtime_error("Could not open output.txt");
+		}
+
+		// Route existing cout-based output to output.txt.
+		streambuf* coutBackup = cout.rdbuf(outputFile.rdbuf());
+
 		// Collection / Array examples
 		vector<unique_ptr<BaseEntity>> entities; // Polymorphic collection
 		entities.push_back(make_unique<DerivedEntity>(
@@ -225,6 +235,9 @@ int main() {
 		temp.update(4, "UPDATED_TEMP_2");
 		cout << "\nAfter update overloading calls:\n";
 		temp.printSummary();
+
+		// Restore standard streams before exit.
+		cout.rdbuf(coutBackup);
 	} catch (const exception& ex) {
 		// Exception handling example
 		cerr << "Error: " << ex.what() << '\n';
